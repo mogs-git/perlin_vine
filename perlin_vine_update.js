@@ -24,22 +24,47 @@ class Walker {
 		}
 
 
-		let stepx = getRandomInt(-1.5,1.5);
-		let stepy = getRandomInt(-1.5,1.5);
+		let stepx = getRandomInt(-3,3);
+		let stepy = getRandomInt(-3,3);
 
-		if (random(1) < 0.35) {
-			if (this.x > mouseX) {
-				this.x -= 2;
+		let angle;
+		// T = O/A therefore t = dx/dy
+		if (mouseX > this.x && mouseY < this.y) {
+			angle = Math.atan(abs((mouseX - this.x)) / abs((mouseY-this.y)));
+		} else if (mouseX > this.x && mouseY > this.y) {
+			angle = Math.PI/2 + Math.atan(abs(abs((mouseY-this.y))/(mouseX - this.x)));
+		} else if (mouseX < this.x && mouseY > this.y) {
+			angle = Math.PI + Math.atan(abs((mouseX - this.x)) / abs((mouseY-this.y)));		
+		} else if (mouseX < this.x && mouseY < this.y) {
+			angle = (3*Math.PI/2) + Math.atan(abs(mouseY-this.y) / abs(mouseX - this.x));
+		}
+		angle = angle*180/(Math.PI); // convert to degrees;
+
+		if (random(1) < 0.5) {
+			if ((angle < 22.5 && angle > 0) || (angle < 0 && angle > 337.5)) {
+				this.y -= 1;
+			} else if (angle >= 22.5 && angle < 67.5) {
+				this.x+=1;
+				this.y-=1;
+			} else if (angle >= 67.5 && angle < 112.5) {
+				this.x+=1;
+			} else if ( angle >= 112.5 && angle < 157.5) {
+				this.x +=1;
+				this.y +=1;
+			} else if (angle >= 157.5 && angle < 202.5) {
+				this.y +=1;
+			} else if (angle >= 202.5 && angle < 247.5) {
+				this.y += 1;
+				this.x -= 1;
+			} else if (angle >= 247.5 && angle < 292.5) {
+				this.x -= 1;
+			} else if (angle >= 292.5 && angle < 337.5) {
+				this.x -= 1;
+				this.y -= 1;
 			} else {
-				this.x += 2;
+				this.x = this.x;
+				this.y = this.y;
 			}
-
-			if (this.y > mouseY) {
-				this.y -= 2;
-			} else {
-				this.y += 2;
-			}
-
 		} else {
 			this.x += stepx;
 			this.y += stepy;
@@ -135,7 +160,7 @@ let w = new Walker(null, 400, 0, 10000);
 
 function setup() { 
 	background(220);
-	createCanvas(1000, 1000);
+	createCanvas(400, 400);
 	angleMode(DEGREES);
 } 
 
@@ -147,8 +172,8 @@ function draw() {
   if (frameCount % 20 == 0) {
   	w.draw_leaf();
   }
-  if (frameCount % 30 ==0) {
-  	active_minis.push(new miniWalker(w.x, w.y, 0, random(1,100000), frameCount, getGreen(150,200), randomRange(50,300)));
+  if (frameCount % 50 ==0) {
+  	active_minis.push(new miniWalker(w.x, w.y, 0, random(1,100000), frameCount, getGreen(150,200), randomRange(50,150)));
   }
    active_minis.forEach((mw) => {
   		mw.step();
