@@ -41,7 +41,7 @@ class Walker {
 		angle = angle*180/(Math.PI); // convert to degrees;
 
 		if (random(1) < 0.5) {
-			if ((angle < 22.5 && angle > 0) || (angle < 0 && angle > 337.5)) {
+			if ((angle < 22.5 && angle > 0) || (angle > 337.5)) {
 				this.y -= 1;
 			} else if (angle >= 22.5 && angle < 67.5) {
 				this.x+=1;
