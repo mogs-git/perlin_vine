@@ -1,5 +1,36 @@
 let r, g, b;
 
+function calculate_angle(x1, y1, x2, y2, degrees) {
+	// returns an angle based on two points between 0 and 360 from vertical going clockwise. 
+
+	if (x2 > x1 && y2 < y1) {
+		angle = Math.atan(abs((x2-x1)) / abs((y2-y1)));
+	} else if (x2 > x1 && y2 > y1) {
+		angle = Math.PI/2 + Math.atan(abs(abs((y2-y1))/(x2-x1)));
+	} else if (x2 < x1 && y2 > y1) {
+		angle = Math.PI + Math.atan(abs((x2-x1)) / abs((y2-y1)));		
+	} else if (x2 < x1 && y2 < y1) {
+		angle = (3*Math.PI/2) + Math.atan(abs(y2-y1) / abs(x2-x1));
+	}
+	if (degrees) {
+		angle = angle*180/(Math.PI); // convert to degrees;
+	}
+	return angle;
+}
+
+function randomRange(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; 
+}
+
+function getCol(minr, maxr, ming, maxg, minb, maxb) {
+	r = randomRange(minr, maxr);
+	g = randomRange(ming,maxg);
+	b = randomRange(minb,maxb);
+	return "rgb(" + r + "," + g + "," + b + ")";
+}
+
 class Walker {
 	constructor(x, y, tx, ty) {
 		this.x = x;
@@ -9,38 +40,16 @@ class Walker {
 	}
 
 	step() {
-		// PERLIN
-		// this.x = map(noise(this.tx), 0, 1, 0, width);
-		// this.y = map(noise(this.ty), 0, 1, 0, height);
-
-		// this.tx += 0.01;
-		// this.ty += 0.01;
-
 		// RANDOM FOLLOWER
-		function getRandomInt(min, max) {
-		    min = Math.ceil(min);
-		    max = Math.floor(max);
-		    return Math.floor(Math.random() * (max - min + 1)) + min;
-		}
-
-
-		let stepx = getRandomInt(-3,3);
-		let stepy = getRandomInt(-3,3);
+		let stepx = randomRange(-3,3);
+		let stepy = randomRange(-3,3);
 
 		let angle;
-		// T = O/A therefore t = dx/dy
-		if (mouseX > this.x && mouseY < this.y) {
-			angle = Math.atan(abs((mouseX - this.x)) / abs((mouseY-this.y)));
-		} else if (mouseX > this.x && mouseY > this.y) {
-			angle = Math.PI/2 + Math.atan(abs(abs((mouseY-this.y))/(mouseX - this.x)));
-		} else if (mouseX < this.x && mouseY > this.y) {
-			angle = Math.PI + Math.atan(abs((mouseX - this.x)) / abs((mouseY-this.y)));		
-		} else if (mouseX < this.x && mouseY < this.y) {
-			angle = (3*Math.PI/2) + Math.atan(abs(mouseY-this.y) / abs(mouseX - this.x));
-		}
-		angle = angle*180/(Math.PI); // convert to degrees;
+		let wiggle_probability = 0.5;
 
-		if (random(1) < 0.5) {
+		if (random(1) < (1-wiggle_probability)) {
+			angle = calculate_angle(this.x, this.y, mouseX, mouseY, true);
+
 			if ((angle < 22.5 && angle > 0) || (angle > 337.5)) {
 				this.y -= 1;
 			} else if (angle >= 22.5 && angle < 67.5) {
@@ -74,19 +83,20 @@ class Walker {
 	draw_leaf() {
 		fill(getCol(160,200,52,58,60,70));
 		noStroke();
+		let scale = 3;
+		let origin = {
+			x: 0,
+			y:0
+		}
 		push();
 		translate(this.x, this.y);
 		rotate(random(0,360));	
 		beginShape();
-		vertex(0,0);
-		bezierVertex(0+8.8/3, 0+16.9/3, 0+32.5/3, 0+16.5/3, 0+30/3, 0);
-		bezierVertex(0+32.5/3, 0 - 16.5/3, 0+8.8/3, 0 - 16.9/3, 0, 0);
-		// vertex(this.x, this.y);
-		// bezierVertex(this.x+8.8/5, this.y+16.9/5, this.x+32.5/5, this.y+16.5/5, this.x+30/5, this.y);
-		// bezierVertex(this.x+32.5/5, this.y - 16.5/5, this.x+8.8/5, this.y - 16.9/5, this.x, this.y);
+		vertex(origin.x,origin.y);
+		bezierVertex(origin.x+8.8/scale, origin.y+16.9/scale, origin.x+32.5/scale, origin.y+16.5/scale, origin.x+30/scale, origin.y);
+		bezierVertex(origin.x+32.5/scale, origin.y - 16.5/scale, origin.x+8.8/scale, origin.y - 16.9/scale, origin.x, origin.y);
 		endShape();
 		pop();
-		//translate(0,0);
 	}
 
 	display() {
@@ -136,25 +146,6 @@ class miniWalker {
 
 }
 
-function randomRange(min, max) {
-   min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
-}
-
-function getCol(minr, maxr, ming, maxg, minb, maxb) {
-	r = randomRange(minr, maxr);
-	g = randomRange(ming,maxg);
-	b = randomRange(minb,maxb);
-	return "rgb(" + r + "," + g + "," + b + ")";
-}
-
-function getGreen(mingreen, maxgreen) {
-	r = randomRange(0,60);
-	g = randomRange(mingreen,maxgreen);
-	b = randomRange(0,60);
-	return "rgb(" + r + "," + g + "," + b + ")";
-}
 
 let w = new Walker(null, 400, 0, 10000);
 
@@ -169,12 +160,15 @@ let active_minis = [];
 function draw() { 
   w.step();
   w.display();
+
   if (frameCount % 20 == 0) {
   	w.draw_leaf();
   }
+
   if (frameCount % 50 ==0) {
-  	active_minis.push(new miniWalker(w.x, w.y, 0, random(1,100000), frameCount, getGreen(150,200), randomRange(50,150)));
+  	active_minis.push(new miniWalker(w.x, w.y, 0, random(1,100000), frameCount, getCol(0,60,150,200,0,60), randomRange(50,150)));
   }
+  
    active_minis.forEach((mw) => {
   		mw.step();
   		mw.display();
