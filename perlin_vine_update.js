@@ -1,4 +1,5 @@
 let r, g, b;
+let angle;
 
 function calculate_angle(x1, y1, x2, y2, degrees) {
 	// returns an angle based on two points between 0 and 360 from vertical going clockwise. 
